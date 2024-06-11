@@ -15,3 +15,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::apiResource('departments', 'DepartmentController');
+Route::get('departments/{department}/subdepartments', 'DepartmentController@subdepartments');
+Route::post('departments/searchByColumn', 'DepartmentController@searchByColumn');

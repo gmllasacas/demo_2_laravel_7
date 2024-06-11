@@ -7,6 +7,8 @@ use App\Http\Resources\DepartmentResource;
 use App\Models\Department;
 use App\Http\Requests\StoreDepartment;
 use App\Http\Requests\UpdateDepartment;
+use App\Http\Requests\SearchDepartment;
+use Illuminate\Database\Eloquent\Builder;
 
 class DepartmentController extends Controller
 {
@@ -85,5 +87,60 @@ class DepartmentController extends Controller
         $department->delete();
 
         return response()->json(null, 204);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function subdepartments(Department $department)
+    {
+        $data = $department->subDepartments;
+
+        return DepartmentResource::collection($data);
+    }
+
+    /**
+     * Ejemplo de uso del endpoint:
+     * curl --location 'https://test-back.tahuaclub.com/api/departments/searchByColumn' \
+     * --header 'Accept: application/json' \
+     * --header 'Content-Type: application/json' \
+     * --data '{
+     *     "text": "embajador",
+     *     "value": "Zander Barton IV"
+     * }'
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function searchByColumn(SearchDepartment $request)
+    {
+        $validated = $request->validated();
+        $value = '%' . $validated['value'] .'%';
+
+        switch ($validated['text']) {
+            case 'division':
+                $data = Department::where('name', 'like', $value)->get();
+                break;
+            case 'division_superior':
+                $data = Department::whereHas('superiorDepartment', function (Builder $query) use ($value) {
+                    $query->where('name', 'like', $value);
+                })->get();
+                break;
+            case 'colaboradores':
+            case 'nivel':
+                // No es posible, debido a que es un dato random
+            case 'subdivisiones':
+                break;
+            case 'embajador':
+                $data = Department::whereHas('embassador', function (Builder $query) use ($value) {
+                    $query->where('name', 'like', $value);
+                })->get();
+                break;
+            default:
+                break;
+        }
+
+        return DepartmentResource::collection($data);
     }
 }
