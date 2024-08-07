@@ -14,6 +14,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::apiResource('departments', 'DepartmentController');
-Route::get('departments/{department}/subdepartments', 'DepartmentController@subdepartments');
-Route::post('departments/searchByColumn', 'DepartmentController@searchByColumn');
+Route::post('register', 'UserController@register');
+Route::post('login', 'UserController@login');
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::apiResource('departments', 'DepartmentController');
+    Route::get('departments/{department}/subdepartments', 'DepartmentController@subdepartments');
+    Route::post('departments/searchByColumn', 'DepartmentController@searchByColumn');
+});
